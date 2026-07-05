@@ -11,7 +11,7 @@ Discuss → Plan → Execute → Verify → Ship
 ```
 
 - **Discuss**：执行前对齐目标/约束/风险
-- **Plan**：MOA 3路并行出方案（S1千问35b + S2 MiniMax + S3千问397b → Aggregator）
+- **Plan**：MOA 3路并行出方案（S1 + S2 + S3（3路reference）→ Aggregator）
 - **Execute**：Kanban 建任务 → delegate_task 派发 → checkpoint 记录
 - **Verify**：MOA 3视角验证（Completeness / CodeQuality / DataFlow → Aggregator）
 - **Ship**：归档 + 汇报用户
@@ -126,11 +126,11 @@ out = aggregate_moa_context(
     user_prompt=plan_prompt,
     api_messages=[{"role":"user","content": discuss_content}],
     reference_models=[
-        {"provider": "a3b", "model": "xopqwen36v35b"},       # S1: 千问35b
-        {"provider": "minimax-cn", "model": "MiniMax-M2.7"},  # S2: MiniMax
-        {"provider": "a3b", "model": "xopqwen36397b17b"},    # S3: 千问397b
+        {"provider": "a3b", "model": "S1_MODEL"},       # S1: 结构化分解
+        {"provider": "minimax-cn", "model": "S2_MODEL"},  # S2: 代码实现路径
+        {"provider": "a3b", "model": "S3_MODEL"},    # S3: 架构风险
     ],
-    aggregator={"provider": "a3b", "model": "xopqwen36397b17b"},
+    aggregator={"provider": "a3b", "model": "S3_MODEL"},
 )
 ```
 
@@ -163,11 +163,11 @@ out = aggregate_moa_context(
     user_prompt=verifier_prompt,
     api_messages=[{"role":"user","content": plan_and_summary}],
     reference_models=[
-        {"provider": "a3b", "model": "xopqwen36v35b"},       # V1: Completeness
-        {"provider": "minimax-cn", "model": "MiniMax-M2.7"},  # V2: CodeQuality
-        {"provider": "a3b", "model": "xopqwen36397b17b"},    # V3: DataFlow
+        {"provider": "a3b", "model": "S1_MODEL"},       # V1: Completeness
+        {"provider": "minimax-cn", "model": "S2_MODEL"},  # V2: CodeQuality
+        {"provider": "a3b", "model": "S3_MODEL"},    # V3: DataFlow
     ],
-    aggregator={"provider": "a3b", "model": "xopqwen36397b17b"},
+    aggregator={"provider": "a3b", "model": "S3_MODEL"},
 )
 ```
 

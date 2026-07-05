@@ -102,20 +102,20 @@ out = aggregate_moa_context(
     user_prompt=plan_prompt,
     api_messages=[{"role":"user","content": discuss_content}],
     reference_models=[
-        {"provider": "a3b", "model": "xopqwen36v35b"},       # S1: 千问35b
-        {"provider": "minimax-cn", "model": "MiniMax-M2.7"},  # S2: MiniMax
-        {"provider": "a3b", "model": "xopqwen36397b17b"},    # S3: 千问397b
+        {"provider": "a3b", "model": "S1_MODEL"},       # S1: 结构化分解
+        {"provider": "minimax-cn", "model": "S2_MODEL"},  # S2: 代码实现路径
+        {"provider": "a3b", "model": "S3_MODEL"},    # S3: 架构风险
     ],
-    aggregator={"provider": "a3b", "model": "xopqwen36397b17b"},
+    aggregator={"provider": "a3b", "model": "S3_MODEL"},
 )
 write_file(path=f"~/.hermes/task-lifecycle/{task_id}/plan.md", content=out)
 ```
 
 **MOA 配置**：
-- S1=千问35b（结构化分解）
-- S2=MiniMax-M2.7（代码实现路径）
-- S3=千问397b（架构风险）
-- Aggregator=千问397b（综合）
+- S1=第1reference模型（结构化分解）
+- S2=第2reference模型（代码实现路径）
+- S3=第3reference模型（架构风险）
+- Aggregator=聚合模型（综合）
 
 **输出**：
 - `~/.hermes/task-lifecycle/{task_id}/plan.md` — MOA 综合方案
@@ -290,19 +290,19 @@ out = aggregate_moa_context(
     user_prompt=verifier_prompt,
     api_messages=[{"role":"user","content": f"plan={plan_content}\nsummary={summary_content}"}],
     reference_models=[
-        {"provider": "a3b", "model": "xopqwen36v35b"},       # V1: Completeness
-        {"provider": "minimax-cn", "model": "MiniMax-M2.7"},  # V2: CodeQuality
-        {"provider": "a3b", "model": "xopqwen36397b17b"},    # V3: DataFlow
+        {"provider": "a3b", "model": "S1_MODEL"},       # V1: Completeness
+        {"provider": "minimax-cn", "model": "S2_MODEL"},  # V2: CodeQuality
+        {"provider": "a3b", "model": "S3_MODEL"},    # V3: DataFlow
     ],
-    aggregator={"provider": "a3b", "model": "xopqwen36397b17b"},
+    aggregator={"provider": "a3b", "model": "S3_MODEL"},
 )
 write_file(path=f"~/.hermes/task-lifecycle/{task_id}/VERIFICATION.md", content=out)
 ```
 
 **3 视角分工**：
-- V1（千问35b）：Completeness — must_haves 对照、scope 边界
-- V2（MiniMax-M2.7）：CodeQuality — 反模式、存根、债务标记
-- V3（千问397b）：DataFlow — 数据流追踪、API→DB 连接
+- V1（第1reference模型）：Completeness — must_haves 对照、scope 边界
+- V2（第2reference模型）：CodeQuality — 反模式、存根、债务标记
+- V3（第3reference模型）：DataFlow — 数据流追踪、API→DB 连接
 
 **MOA 输出**：
 - `~/.hermes/task-lifecycle/{task_id}/VERIFICATION.md`

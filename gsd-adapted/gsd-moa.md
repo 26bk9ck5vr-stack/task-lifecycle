@@ -10,10 +10,10 @@ category: agent
 
 **MOA 配置**（固定）：
 ```
-S1: a3b:xopqwen36v35b       — 讯飞千问35b
-S2: minimax-cn:MiniMax-M2.7 — MiniMax
-S3: a3b:xopqwen36397b17b   — 讯飞千问397b
-Aggregator: a3b:xopqwen36397b17b — 讯飞千问397b
+S1: 第1个reference模型 — 擅长结构化分解、任务切片
+S2: 第2个reference模型 — 擅长代码实现路径、依赖分析
+S3: 第3个reference模型 — 擅长架构设计、风险预判
+Aggregator: 综合能力最强的模型
 ```
 
 **调用方式**：
@@ -24,11 +24,11 @@ out = aggregate_moa_context(
     user_prompt="...",
     api_messages=[{"role":"user","content":"..."}],
     reference_models=[
-        {"provider": "a3b", "model": "xopqwen36v35b"},
-        {"provider": "minimax-cn", "model": "MiniMax-M2.7"},
-        {"provider": "a3b", "model": "xopqwen36397b17b"},
+        {"provider": "a3b", "model": "S1_MODEL"},       # S1
+        {"provider": "minimax-cn", "model": "S2_MODEL"},  # S2
+        {"provider": "a3b", "model": "S3_MODEL"},    # S3
     ],
-    aggregator={"provider": "a3b", "model": "xopqwen36397b17b"},
+    aggregator={"provider": "a3b", "model": "AGGREGATOR_MODEL"},
 )
 ```
 
@@ -60,9 +60,9 @@ out = aggregate_moa_context(
 
 ```python
 role_descriptions = {
-    "S1": "千问35b — 擅长结构化分解、任务切片、P0 优先级排序",
-    "S2": "MiniMax — 擅长代码实现路径分析、依赖关系、技术选型",
-    "S3": "千问397b — 擅长架构设计、长期风险预判、系统性思维"
+    "S1": "第1个reference模型 — 擅长结构化分解、任务切片、P0 优先级排序",
+    "S2": "第2个reference模型 — 擅长代码实现路径分析、依赖关系、技术选型",
+    "S3": "第3个reference模型 — 擅长架构设计、长期风险预判、系统性思维"
 }
 
 prompt = f"""你是 MOA Planner 的 {role}。
@@ -93,13 +93,13 @@ prompt = f"""你是 MOA Planner 的 {role}。
 
 你是一个方案综合专家。3 个不同专长的 AI 同时给出了 {feature_name} 实现方案。
 
-**方案A（千问35b，结构化分解专家）**：
+**方案A（第1个reference模型，结构化分解专家）**：
 {方案A内容}
 
-**方案B（MiniMax，代码实现路径专家）**：
+**方案B（第2个reference模型，代码实现路径专家）**：
 {方案B内容}
 
-**方案C（千问397b，架构风险专家）**：
+**方案C（第3个reference模型，架构风险专家）**：
 {方案C内容}
 
 **请综合 3 份方案，输出最终 plan.md**：
@@ -148,9 +148,9 @@ write_file(
 
 | Verifier | 模型 | 角度 | 验证内容 |
 |----------|------|------|----------|
-| V1 | 千问35b | Completeness（完整性） | must_haves对照、scope边界、所有P0任务是否完成 |
-| V2 | MiniMax-M2.7 | CodeQuality（代码质量） | 反模式、存根、债务标记、空实现、硬编码 |
-| V3 | 千问397b | DataFlow（数据流） | API→DB连接、Props传递、数据源真实性 |
+| V1 | 第1个reference模型 | Completeness（完整性） | must_haves对照、scope边界、所有P0任务是否完成 |
+| V2 | 第2个reference模型 | CodeQuality（代码质量） | 反模式、存根、债务标记、空实现、硬编码 |
+| V3 | 第3个reference模型 | DataFlow（数据流） | API→DB连接、Props传递、数据源真实性 |
 
 ## Reference prompt（3路并行）
 
@@ -265,7 +265,7 @@ verifier_prompts = {
 phase: 3
 task_id: {task_id}
 date: {ISO date}
-verifier: MOA (V1=千问35b, V2=MiniMax-M2.7, V3=千问397b, Aggregator=千问397b)
+verifier: MOA (V1=第1ref模型, V2=第2ref模型, V3=第3ref模型, Aggregator=聚合模型)
 ---
 
 # Verification Report — {task_id}
